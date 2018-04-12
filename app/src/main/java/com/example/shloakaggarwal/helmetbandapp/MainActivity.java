@@ -1,5 +1,6 @@
 package com.example.shloakaggarwal.helmetbandapp;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -7,8 +8,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.PhoneStateListener;
 import android.telephony.SmsManager;
+import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.content.Intent;
@@ -28,39 +32,31 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         callButton = (Button) findViewById(R.id.callButton);
+
+        callButton.setEnabled(false);
+        if (checkPermission(Manifest.permission.SEND_SMS)) {
+            callButton.setEnabled(true);
+        } else {
+            ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.SEND_SMS}, SEND_SMS_PERMISSION_REQUEST_CODE);
+        }
+
+        // add PhoneStateListener
+        PhoneCallListener phoneListener = new PhoneCallListener();
+        TelephonyManager telephonyManager = (TelephonyManager) MainActivity.this.getSystemService(Context.TELEPHONY_SERVICE);
+        telephonyManager.listen(phoneListener, PhoneStateListener.LISTEN_CALL_STATE);
+
         callButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
 
-                final String phoneNo = "7982374567";
-                final String message = "hi";
+                final String phoneNo = "9560840087";
+                final String message = "hello";
+
+                SmsManager smsManager = SmsManager.getDefault();
+                smsManager.sendTextMessage(phoneNo, null, message, null, null);
 
                 Intent callIntent = new Intent(Intent.ACTION_CALL);
                 callIntent.setData(Uri.parse("tel:" + phoneNo));
-
-                callButton.setEnabled(false);
-                if(checkPermission(Manifest.permission.SEND_SMS)) {
-                    callButton.setEnabled(true);
-                }else {
-                    ActivityCompat.requestPermissions(MainActivity.this, new String[] {Manifest.permission.SEND_SMS},
-                            SEND_SMS_PERMISSION_REQUEST_CODE);
-                }
-                callButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View view) {
-                        if(!TextUtils.isEmpty(message) && !TextUtils.isEmpty(phoneNo)) {
-
-                            if(checkPermission(Manifest.permission.SEND_SMS)) {
-                                SmsManager smsManager = SmsManager.getDefault();
-                                smsManager.sendTextMessage(phoneNo, null, message, null, null);
-                            }else {
-                                Toast.makeText(MainActivity.this, "Permission denied", Toast.LENGTH_SHORT).show();
-                            }
-                        }
-                    }
-                });
-
-                if (ActivityCompat.checkSelfPermission(MainActivity.this,
-                        Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(MainActivity.this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                     return;
                 }
                 startActivity(callIntent);
@@ -83,6 +79,51 @@ public class MainActivity extends AppCompatActivity {
                 OpenReceivingActivity();
             }
         });
+    }
+
+    //monitor phone call activities
+    private class PhoneCallListener extends PhoneStateListener {
+
+        private boolean isPhoneCalling = false;
+
+        String LOG_TAG = "LOGGING 123";
+
+        @Override
+        public void onCallStateChanged(int state, String incomingNumber) {
+
+            if (TelephonyManager.CALL_STATE_RINGING == state) {
+                // phone ringing
+                Log.i(LOG_TAG, "RINGING, number: " + incomingNumber);
+            }
+
+            if (TelephonyManager.CALL_STATE_OFFHOOK == state) {
+                // active
+                Log.i(LOG_TAG, "OFFHOOK");
+
+                isPhoneCalling = true;
+            }
+
+            if (TelephonyManager.CALL_STATE_IDLE == state) {
+                // run when class initial and phone call ended,
+                // need detect flag from CALL_STATE_OFFHOOK
+                Log.i(LOG_TAG, "IDLE");
+
+                if (isPhoneCalling) {
+
+                    Log.i(LOG_TAG, "restart app");
+
+                    // restart app
+                    Intent i = getBaseContext().getPackageManager()
+                            .getLaunchIntentForPackage(
+                                    getBaseContext().getPackageName());
+                    i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    startActivity(i);
+
+                    isPhoneCalling = false;
+                }
+
+            }
+        }
     }
 
     private boolean checkPermission(String permission) {
