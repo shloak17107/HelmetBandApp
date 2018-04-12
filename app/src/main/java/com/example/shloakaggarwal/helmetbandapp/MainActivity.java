@@ -11,13 +11,11 @@ import android.os.Bundle;
 import android.telephony.PhoneStateListener;
 import android.telephony.SmsManager;
 import android.telephony.TelephonyManager;
-import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.content.Intent;
 import android.Manifest;
-import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,8 +29,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // declare button
         callButton = (Button) findViewById(R.id.callButton);
 
+        // check for SEND_SMS permissions
         callButton.setEnabled(false);
         if (checkPermission(Manifest.permission.SEND_SMS)) {
             callButton.setEnabled(true);
@@ -45,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
         TelephonyManager telephonyManager = (TelephonyManager) MainActivity.this.getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(phoneListener, PhoneStateListener.LISTEN_CALL_STATE);
 
+        // when button is clicked, SMS is sent and phone call is placed
         callButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View arg0) {
 
@@ -64,6 +65,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // opens Connection activity for controlling LED
         connectionButton = (Button) findViewById(R.id.connectionButton);
         connectionButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -72,6 +74,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // opens Receiving activity
         receivingButton = (Button) findViewById(R.id.receivingButton);
         receivingButton.setOnClickListener(new View.OnClickListener() {
             @Override
