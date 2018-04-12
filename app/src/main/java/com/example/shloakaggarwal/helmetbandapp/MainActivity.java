@@ -16,14 +16,12 @@ import android.view.View;
 import android.widget.Button;
 import android.content.Intent;
 import android.Manifest;
-import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
     private Button connectionButton;
     private Button receivingButton;
     private Button callButton;
-    private TextView locationText;
     final int SEND_SMS_PERMISSION_REQUEST_CODE = 111;
     GPSTracker gps;
 
