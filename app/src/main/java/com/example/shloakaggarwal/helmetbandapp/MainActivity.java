@@ -16,13 +16,16 @@ import android.view.View;
 import android.widget.Button;
 import android.content.Intent;
 import android.Manifest;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity {
 
     private Button connectionButton;
     private Button receivingButton;
     private Button callButton;
+    private TextView locationText;
     final int SEND_SMS_PERMISSION_REQUEST_CODE = 111;
+    GPSTracker gps;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,7 +53,20 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View arg0) {
 
                 final String phoneNo = "9560840087";
-                final String message = "hello";
+                String message = null;
+
+                // code for location services
+                gps = new GPSTracker(MainActivity.this);
+                if(gps.canGetLocation()){
+                    double latitude = gps.getLatitude();
+                    double longitude = gps.getLongitude();
+                    message = latitude + "\n" + longitude;
+                } else {
+                    // can't get location
+                    // GPS or Network is not enabled
+                    // Ask user to enable GPS/network in settings
+                    gps.showSettingsAlert();
+                }
 
                 SmsManager smsManager = SmsManager.getDefault();
                 smsManager.sendTextMessage(phoneNo, null, message, null, null);
@@ -155,4 +171,5 @@ public class MainActivity extends AppCompatActivity {
         Intent openreceivingactivityIntent = new Intent(this, Receiving.class);
         startActivity(openreceivingactivityIntent);
     }
+
 }
