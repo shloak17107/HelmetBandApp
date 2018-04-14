@@ -1,7 +1,11 @@
 package com.example.shloakaggarwal.helmetbandapp;
 
+import android.annotation.SuppressLint;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.location.Address;
+import android.location.Geocoder;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
@@ -16,6 +20,10 @@ import android.view.View;
 import android.widget.Button;
 import android.content.Intent;
 import android.Manifest;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -58,7 +66,8 @@ public class MainActivity extends AppCompatActivity {
                 if(gps.canGetLocation()){
                     double latitude = gps.getLatitude();
                     double longitude = gps.getLongitude();
-                    message = latitude + "\n" + longitude;
+                    message = "SOS EMERGENCY\n" + "XYZ has had an accident at the location: " + latitude + ", "
+                            + longitude + "\n" + "FULL ADDRESS IS: " + getCompleteAddressString(latitude, longitude);
                 } else {
                     // can't get location
                     // GPS or Network is not enabled
@@ -67,7 +76,8 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 SmsManager smsManager = SmsManager.getDefault();
-                smsManager.sendTextMessage(phoneNo, null, message, null, null);
+                ArrayList<String> parts = smsManager.divideMessage(message);
+                smsManager.sendMultipartTextMessage(phoneNo, null, parts, null, null);
 
                 Intent callIntent = new Intent(Intent.ACTION_CALL);
                 callIntent.setData(Uri.parse("tel:" + phoneNo));
@@ -168,6 +178,31 @@ public class MainActivity extends AppCompatActivity {
     private void OpenReceivingActivity() {
         Intent openreceivingactivityIntent = new Intent(this, Receiving.class);
         startActivity(openreceivingactivityIntent);
+    }
+
+    @SuppressLint("LongLogTag")
+    private String getCompleteAddressString(double LATITUDE, double LONGITUDE) {
+        String strAdd = "";
+        Geocoder geocoder = new Geocoder(this, Locale.getDefault());
+        try {
+            List<Address> addresses = geocoder.getFromLocation(LATITUDE, LONGITUDE, 1);
+            if (addresses != null) {
+                Address returnedAddress = addresses.get(0);
+                StringBuilder strReturnedAddress = new StringBuilder("");
+
+                for (int i = 0; i <= returnedAddress.getMaxAddressLineIndex(); i++) {
+                    strReturnedAddress.append(returnedAddress.getAddressLine(i)).append("\n");
+                }
+                strAdd = strReturnedAddress.toString();
+                Log.w("My Current loction address", strReturnedAddress.toString());
+            } else {
+                Log.w("My Current loction address", "No Address returned!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            Log.w("My Current loction address", "Canont get Address!");
+        }
+        return strAdd;
     }
 
 }
