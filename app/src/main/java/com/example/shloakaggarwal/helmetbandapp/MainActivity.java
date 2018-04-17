@@ -10,6 +10,8 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -31,6 +33,8 @@ import java.util.Locale;
 public class MainActivity extends AppCompatActivity {
 
     private ActionBar toolbar;
+    Fragment currentFragment = null;
+    FragmentTransaction ft;
     private Button connectionButton;
     private Button receivingButton;
     private Button callButton;
@@ -43,6 +47,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         toolbar = getSupportActionBar();
+        ft = getSupportFragmentManager().beginTransaction();
+        currentFragment = new HomeFragment();
+        ft.replace(R.id.relative, currentFragment);
+        ft.commit();
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
         toolbar.setTitle("Home");
@@ -122,21 +130,33 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-            Fragment fragment;
             switch (item.getItemId()) {
                 case R.id.navigation_home:
                     toolbar.setTitle("Home");
+                    currentFragment = new HomeFragment();
+                    ft = getSupportFragmentManager().beginTransaction();
+                    ft.replace(R.id.relative, currentFragment);
+                    ft.commit();
                     return true;
                 case R.id.navigation_map:
                     toolbar.setTitle("Map");
+                    currentFragment = new MapFragment();
+                    ft = getSupportFragmentManager().beginTransaction();
+                    ft.replace(R.id.relative, currentFragment);
+                    ft.commit();
                     return true;
                 case R.id.navigation_settings:
                     toolbar.setTitle("Settings");
+                    currentFragment = new SettingsFragment();
+                    ft = getSupportFragmentManager().beginTransaction();
+                    ft.replace(R.id.relative, currentFragment);
+                    ft.commit();
                     return true;
             }
             return false;
         }
     };
+
 
     //monitor phone call activities
     private class PhoneCallListener extends PhoneStateListener {
