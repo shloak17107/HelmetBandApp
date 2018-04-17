@@ -132,6 +132,9 @@ public class MainActivity extends AppCompatActivity {
         public boolean onNavigationItemSelected(@NonNull MenuItem item) {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
+                    callButton.setVisibility(View.VISIBLE);
+                    receivingButton.setVisibility(View.VISIBLE);
+                    connectionButton.setVisibility(View.VISIBLE);
                     toolbar.setTitle("Home");
                     currentFragment = new HomeFragment();
                     ft = getSupportFragmentManager().beginTransaction();
@@ -139,6 +142,9 @@ public class MainActivity extends AppCompatActivity {
                     ft.commit();
                     return true;
                 case R.id.navigation_map:
+                    callButton.setVisibility(View.GONE);
+                    receivingButton.setVisibility(View.GONE);
+                    connectionButton.setVisibility(View.GONE);
                     toolbar.setTitle("Map");
                     currentFragment = new MapFragment();
                     ft = getSupportFragmentManager().beginTransaction();
@@ -146,6 +152,9 @@ public class MainActivity extends AppCompatActivity {
                     ft.commit();
                     return true;
                 case R.id.navigation_settings:
+                    callButton.setVisibility(View.GONE);
+                    receivingButton.setVisibility(View.GONE);
+                    connectionButton.setVisibility(View.GONE);
                     toolbar.setTitle("Settings");
                     currentFragment = new SettingsFragment();
                     ft = getSupportFragmentManager().beginTransaction();
